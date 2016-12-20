@@ -1,0 +1,14 @@
+{
+  "name": "drupal/relevant_content",
+  "type": "drupal-module",
+  "description": "Provides blocks displaying relevant nodes for the current page based on taxonomy",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://github.com/ericpugh/drupal-relevant-content",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://github.com/ericpugh/drupal-relevant-content/issues",
+    "source": "http://cgit.drupalcode.org/relevant_content"
+  },
+  "require": { }
+}
