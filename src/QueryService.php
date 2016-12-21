@@ -39,4 +39,8 @@ class QueryService implements QueryServiceInterface {
     $this->loggerFactory = $logger_factory;
   }
 
+  public function execute() {
+      return 'this is the service';
+  }
+
 }

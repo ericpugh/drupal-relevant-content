@@ -1,0 +1,9 @@
+
+relevant_content.relevant_content_block_form:
+  path: '/relevant_content/form_debug'
+  defaults:
+    _form: '\Drupal\relevant_content\Form\RelevantContentBlockForm'
+    _title: 'RelevantContentBlockForm'
+  requirements:
+    _access: 'TRUE'
+  
