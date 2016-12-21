@@ -1,0 +1,4 @@
+  relevant_content.query:
+    class: Drupal\relevant_content\QueryService
+    arguments: ['@entity.query', '@module_handler', '@logger.factory']
+
