@@ -14,6 +14,7 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\relevant_content\QueryService;
+use Drupal\Core\Entity\EntityDisplayRepository;
 
 /**
  * Provides a 'RelevantContentBlock' block.
@@ -46,6 +47,12 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
      * @var \Drupal\relevant_content\QueryService
      */
     protected $relevantQuery;
+    /**
+     * The Entity Display Repository.
+     *
+     * @var \Drupal\Core\Entity\EntityDisplayRepository
+     */
+    protected $entityDisplayRepository;
 
     /**
    * Construct.
@@ -63,12 +70,14 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
         $plugin_definition,
         EntityTypeManager $entity_type_manager,
 	    LoggerChannelFactory $logger_factory,
-        QueryService $query_service
+        QueryService $query_service,
+        EntityDisplayRepository $entity_display_repository
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->loggerFactory = $logger_factory;
     $this->relevantQuery = $query_service;
+    $this->entityDisplayRepository = $entity_display_repository;
   }
   /**
    * {@inheritdoc}
@@ -80,7 +89,8 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
       $plugin_definition,
         $container->get('entity_type.manager'),
       $container->get('logger.factory'),
-        $container->get('relevant_content.query')
+        $container->get('relevant_content.query'),
+        $container->get('entity_display.repository')
     );
   }
 
@@ -120,6 +130,13 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
             '#checked' => 'checked',
             '#options' => $contentTypes,
             '#default_value' => isset($config['allowed_content_types']) ? $config['allowed_content_types'] : [],
+        ];
+        $form['view_mode'] = [
+            '#type' => 'select',
+            '#title' => $this->t('View Mode'),
+            '#description' => $this->t('Select the view mode to use for output of relevant content.'),
+            '#options' => $this->getViewModeOptions(),
+            '#default_value' => isset($config['view_mode']) ? $config['view_mode'] : [],
             '#suffix' => '</div></details>',
         ];
 
@@ -155,6 +172,16 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
         return $options;
     }
     /**
+     * Get a list of view modes as form options.
+     *
+     * @return array $list
+     *   Array of view modes as options.
+     */
+    protected function getViewModeOptions() {
+        return $this->entityDisplayRepository->getViewModeOptions('node');
+    }
+
+    /**
      * Get checked option values from a list of options.
      *
      * @return  array $list
@@ -179,6 +206,7 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
         $this->setConfigurationValue('vocabularies', $form_state->getValue('vocabularies'));
         $this->setConfigurationValue('number_relevant_content', $form_state->getValue('number_relevant_content'));
         $this->setConfigurationValue('allowed_content_types', $form_state->getValue('allowed_content_types'));
+        $this->setConfigurationValue('view_mode', $form_state->getValue('view_mode'));
     }
 
     /**
@@ -207,7 +235,7 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
                                     ->setMaxResults($limit)
                                     ->execute();
 
-      $nodes = $this->relevantQuery->loadNodes($relevant_results);
+      $nodes = $this->relevantQuery->loadNodes($relevant_results, $config['view_mode']);
       if (!empty($nodes)) {
           $build['#theme'] = 'relevant_content_block';
           $build['content'] = $nodes;

@@ -16,25 +16,12 @@ use Drupal\node\Entity\Node;
  */
 class QueryService implements QueryServiceInterface {
 
-  /**
-   * Drupal\Core\Entity\Query\QueryFactory definition.
-   *
-   * @var \Drupal\Core\Entity\Query\QueryFactory
-   */
-  protected $entityQuery;
     /**
      * Database Service Object.
      *
      * @var \Drupal\Core\Database\Connection
      */
     protected $connection;
-
-    /**
-   * Drupal\Core\Extension\ModuleHandler definition.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandler
-   */
-  protected $moduleHandler;
   /**
    * Drupal\Core\Logger\LoggerChannelFactory definition.
    *
@@ -58,10 +45,8 @@ class QueryService implements QueryServiceInterface {
     /**
    * Constructor.
    */
-  public function __construct(QueryFactory $entity_query, Connection $connection, ModuleHandler $module_handler, LoggerChannelFactory $logger_factory) {
-    $this->entityQuery = $entity_query;
+  public function __construct(Connection $connection, LoggerChannelFactory $logger_factory) {
     $this->connection = $connection;
-    $this->moduleHandler = $module_handler;
     $this->loggerFactory = $logger_factory;
   }
 
@@ -320,7 +305,7 @@ class QueryService implements QueryServiceInterface {
                     // Append the count to node for theming.
                     $node->relevant_content_count = $query_results[$node->id()]['cnt'];
                 }
-                $items[] = node_view($node, 'teaser');
+                $items[] = node_view($node, $view_mode);
             }
         }
         return $items;
