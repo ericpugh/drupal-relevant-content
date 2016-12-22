@@ -310,9 +310,20 @@ class QueryService implements QueryServiceInterface {
      * @return array $nodes
      *   An array of node objects.
      */
-    public function loadNodes($query_results) {
-        $nids = array_keys($query_results);
-        return Node::loadMultiple($nids);
+    public function loadNodes($query_results, $view_mode = 'teaser') {
+        $items = [];
+        if (is_array($query_results)) {
+            $nids = array_keys($query_results);
+            $nodes = Node::loadMultiple($nids);
+            foreach ($nodes as $node) {
+                if (isset($query_results[$node->id()])) {
+                    // Append the count to node for theming.
+                    $node->relevant_content_count = $query_results[$node->id()]['cnt'];
+                }
+                $items[] = node_view($node, 'teaser');
+            }
+        }
+        return $items;
     }
 
 }

@@ -20,3 +20,19 @@ function relevant_content_help($route_name, RouteMatchInterface $route_match) {
             break;
     }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function relevant_content_theme($existing, $type, $theme, $path) {
+    // Add items variable and assign twig template for the block template.
+    return [
+        'relevant_content_block' =>
+            [
+                'attributes' => [
+                    'class' => ['relevant-content'],
+                ],
+                'template' => 'block--relevant-content-block',
+            ],
+        ];
+}

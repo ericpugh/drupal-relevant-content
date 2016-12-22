@@ -192,6 +192,7 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
    * {@inheritdoc}
    */
   public function build() {
+      $build = [];
       $config = $this->getConfiguration();
       // Get the current node the block is displayed on.
       $node = $this->getContextValue('node');
@@ -199,29 +200,20 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
       $vids = $this->getCheckedOptionValues($config['vocabularies']);
       $allowed = $this->getCheckedOptionValues($config['allowed_content_types']);
       $limit = $config['number_relevant_content'];
-      $relevant = $this->relevantQuery
-                    ->addNode($node)
-                    ->filterByVocabularies($vids)
-                    ->setAllowedContentTypes($allowed)
-                    ->setMaxResults($limit)
-                    ->execute();
-      $nodes = $this->relevantQuery->loadNodes($relevant);
+      $relevant_results = $this->relevantQuery
+                                    ->addNode($node)
+                                    ->filterByVocabularies($vids)
+                                    ->setAllowedContentTypes($allowed)
+                                    ->setMaxResults($limit)
+                                    ->execute();
 
-      $items = [];
-      foreach ($nodes as $node) {
-              $items[] = node_view($node, 'teaser');
+      $nodes = $this->relevantQuery->loadNodes($relevant_results);
+      if (!empty($nodes)) {
+          $build['#theme'] = 'relevant_content_block';
+          $build['content'] = $nodes;
+
       }
-
-      $build = [
-          'content' => $items,
-      ];
-//      $build['relevant_content_block']['#markup'] = sprintf('Vids: %s<br />  Allowed: %s<br /> Max: %s<br />',
-//          print_r($vids, TRUE),
-//          print_r($allowed, TRUE),
-//            $max
-//      );
-
-    return $build;
+      return $build;
   }
 
 }
