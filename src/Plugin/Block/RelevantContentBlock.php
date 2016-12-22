@@ -21,6 +21,9 @@ use Drupal\relevant_content\QueryService;
  * @Block(
  *  id = "relevant_content_block",
  *  admin_label = @Translation("Relevant Content"),
+ *  context = {
+ *     "node" = @ContextDefinition("entity:node", required = TRUE, label = @Translation("Current Node"))
+ *  }
  * )
  */
 class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginInterface {
@@ -97,14 +100,7 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
             '#title' => $this->t('Vocabularies'),
             '#description' => $this->t('The referenced vocabularies used to find relevant content by term.'),
             '#options' => $vocabularies,
-            '#default_value' => $config['vocabularies'] ? $config['vocabularies'] : [],
-        ];
-        $form['content_types'] = [
-            '#type' => 'checkboxes',
-            '#title' => $this->t('Content Types'),
-            '#description' => $this->t('The referenced content types used to find relevant content.'),
-            '#options' => $contentTypes,
-            '#default_value' => $config['content_types'] ? $config['content_types']: [],
+            '#default_value' => isset($config['vocabularies']) ? $config['vocabularies'] : [],
             '#suffix' => '</div></details>',
         ];
 
@@ -181,7 +177,6 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
      */
     public function blockSubmit($form, FormStateInterface $form_state) {
         $this->setConfigurationValue('vocabularies', $form_state->getValue('vocabularies'));
-        $this->setConfigurationValue('content_types', $form_state->getValue('content_types'));
         $this->setConfigurationValue('number_relevant_content', $form_state->getValue('number_relevant_content'));
         $this->setConfigurationValue('allowed_content_types', $form_state->getValue('allowed_content_types'));
     }
@@ -198,20 +193,33 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
    */
   public function build() {
       $config = $this->getConfiguration();
-    $build = [];
+      // Get the current node the block is displayed on.
+      $node = $this->getContextValue('node');
+      // Get relevant content with the QueryService.
+      $vids = $this->getCheckedOptionValues($config['vocabularies']);
+      $allowed = $this->getCheckedOptionValues($config['allowed_content_types']);
+      $limit = $config['number_relevant_content'];
+      $relevant = $this->relevantQuery
+                    ->addNode($node)
+                    ->filterByVocabularies($vids)
+                    ->setAllowedContentTypes($allowed)
+                    ->setMaxResults($limit)
+                    ->execute();
+      $nodes = $this->relevantQuery->loadNodes($relevant);
 
-    $vids = $this->getCheckedOptionValues($config['vocabularies']);
-    $types = $this->getCheckedOptionValues($config['content_types']);
-    $allowed = $this->getCheckedOptionValues($config['allowed_content_types']);
-    $max = $config['number_relevant_content'];
+      $items = [];
+      foreach ($nodes as $node) {
+              $items[] = node_view($node, 'teaser');
+      }
 
-      $build['relevant_content_block']['#markup'] = sprintf('%s Vids: %s<br /> Types: %s<br /> Allowed: %s<br /> Max: %s<br />',
-        $this->relevantQuery->execute(),
-          print_r($vids, TRUE),
-          print_r($types, TRUE),
-          print_r($allowed, TRUE),
-            $max
-      );
+      $build = [
+          'content' => $items,
+      ];
+//      $build['relevant_content_block']['#markup'] = sprintf('Vids: %s<br />  Allowed: %s<br /> Max: %s<br />',
+//          print_r($vids, TRUE),
+//          print_r($allowed, TRUE),
+//            $max
+//      );
 
     return $build;
   }

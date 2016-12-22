@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Logger\LoggerChannelFactory;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\node\Entity\Node;
 
 /**
  * Class RelevantContentBlockForm.
@@ -65,54 +66,26 @@ class RelevantContentBlockForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-      $contentTypes = $this->getContentTypeOptions();
-      $vocabularies = $this->getVocabulariesOptions();
 
-      $form['relevant_criteria'] = [
-          '#type' => 'fieldset',
-          '#title' => $this->t('Relevant content search'),
-          '#description' => $this->t('The taxonomy terms and reference content to use to determine relevant content.'),
-          '#weight' => 5,
-          '#collapsible' => FALSE,
-          '#collapsed' => FALSE,
-      ];
-      $form['relevant_criteria']['content_types'] = [
-          '#type' => 'checkboxes',
-          '#title' => $this->t('Content Types'),
-          '#description' => $this->t('The referenced content types used to find relevant content.'),
-          '#options' => $contentTypes,
-      ];
-      $form['relevant_criteria']['vocabularies'] = [
-          '#type' => 'checkboxes',
-          '#title' => $this->t('Vocabularies'),
-          '#description' => $this->t('The referenced vocabularies used to find relevant content.'),
-          '#options' => $vocabularies,
-      ];
+      $vids = ['mediums','tags'];
+      $allowed = ['artwork'];
+      $max = 10;
+      $node = Node::load(660); // Joan Mitchell sunflowers
+      $relevantQuery = \Drupal::service('relevant_content.query');
+      $relevantQuery
+          ->addNode($node)
+          ->filterByVocabularies($vids)
+          ->setAllowedContentTypes($allowed)
+          ->addAllowedContentType('article')
+          //->addExcluded(660)
+          ->setMaxResults($max);
 
-      $form['output_criteria'] = [
-          '#type' => 'fieldset',
-          '#title' => $this->t('Relevant content output'),
-          '#description' => $this->t('Settings for the content output.'),
-          '#weight' => 5,
-          '#collapsible' => FALSE,
-          '#collapsed' => FALSE,
-      ];
-      $form['output_criteria']['number_relevant_content'] = [
-          '#type' => 'number',
-          '#title' => $this->t('Number of items to display'),
-          '#size' => 5,
-          '#required' => FALSE,
-      ];
-      $form['output_criteria']['allowed_content_types'] = [
-          '#type' => 'checkboxes',
-          '#title' => $this->t('Allowed Results Types'),
-          '#description' => $this->t('The relevant content types to include in results.'),
-          '#checked' => 'checked',
-          '#options' => $contentTypes,
-      ];
-      $form['submit'] = [
-          '#type' => 'submit',
-      ];
+//      kint($relevantQuery->getTermReferenceFieldsInfo($node));
+//      kint($relevantQuery->tids);
+
+      $result = $relevantQuery->execute();
+      kint($result);
+
 
     return $form;
   }
