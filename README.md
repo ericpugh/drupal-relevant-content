@@ -3,7 +3,7 @@ Relevant Content
 Overview
 ------------
 A Drupal 8 module that creates a block of other relevant content based on the number of like taxonomy terms the content
-references.
+references.[The project page on Drupal.org](https://www.drupal.org/project/relevant_content)
 
 Dependencies
 -----------
