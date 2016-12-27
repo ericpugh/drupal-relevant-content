@@ -11,12 +11,13 @@ use Drupal\Core\Routing\RouteMatchInterface;
  * Implements hook_help().
  */
 function relevant_content_help($route_name, RouteMatchInterface $route_match) {
-    switch ($route_name) {
-        case 'help.page.relevant_content':
-            $output = '';
-            $output .= '<h3>' . t('About') . '</h3>';
-            $output .= '<p>' . t('Relevant Content') . '</p>';
-            return $output;
-            break;
-    }
+  switch ($route_name) {
+    case 'help.page.relevant_content':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Relevant Content') . '</p>';
+      return $output;
+
+    break;
+  }
 }
