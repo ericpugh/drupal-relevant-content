@@ -21,3 +21,17 @@ function relevant_content_help($route_name, RouteMatchInterface $route_match) {
     break;
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function relevant_content_theme($existing, $type, $theme, $path) {
+  $theme = array(
+    'item_list__relevant_content' =>
+      array(
+        'template' => 'item-list--relevant-content',
+      ),
+  );
+  return $theme;
+
+}

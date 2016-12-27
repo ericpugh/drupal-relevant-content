@@ -302,10 +302,14 @@ class QueryService implements QueryServiceInterface {
       $nodes = Node::loadMultiple($nids);
       foreach ($nodes as $node) {
         if (isset($query_results[$node->id()])) {
-          // Append the count to node for theming.
-          $node->relevant_content_count = $query_results[$node->id()]['cnt'];
+          // Create a list of renderable content.
+          $item['value'] = node_view($node, $view_mode);
+          $item['value']['#attributes'] = [
+            'class' => ['relevant-content-item'],
+            'data-relevant-score' => $query_results[$node->id()]['cnt'],
+          ];
+          $items[] = $item;
         }
-        $items[] = node_view($node, $view_mode);
       }
     }
     return $items;

@@ -239,9 +239,10 @@ class RelevantContentBlock extends BlockBase implements ContainerFactoryPluginIn
 
     $nodes = $this->relevantQuery->loadNodes($relevant_results, $config['view_mode']);
     if (!empty($nodes)) {
-      $build['#theme'] = 'relevant_content_block';
-      $build['content'] = $nodes;
-
+      $build['#theme'] = ['item_list__relevant_content'];
+      $build['#context'] = ['list_style' => 'relevant_content'];
+      $build['#items'] = $nodes;
+      $build['#cache']['max-age'] = 3600;
     }
     return $build;
   }
