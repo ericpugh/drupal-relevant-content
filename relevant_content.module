@@ -30,8 +30,9 @@ function relevant_content_theme($existing, $type, $theme, $path) {
     'item_list__relevant_content' =>
       array(
         'template' => 'item-list--relevant-content',
+        'render element' => 'elements',
+        'base hook' => 'block',
       ),
   );
   return $theme;
-
 }
