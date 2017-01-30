@@ -243,12 +243,11 @@ class QueryService implements QueryServiceInterface {
   /**
    * Get relevant content.
    *
-   * @return array
+   * @return array|boolean
    *   Information array of relevant nodes with nid, type,
    *   and relevance count, keyed by Node id.
    */
   public function execute() {
-    // @TODO: try /catch
     try {
       if (!$this->node || !$this->vocabularies) {
         // There's nothing to find relevant content for.
@@ -275,8 +274,7 @@ class QueryService implements QueryServiceInterface {
       $query->groupBy('n.nid')
         ->groupBy('n.type')
         ->orderBy('cnt', 'DESC')
-        ->orderBy('n.created', 'DESC')
-        ->orderBy('n.nid', 'DESC')
+        ->orderBy('n.nid', 'ASC')
         ->range(0, $this->maxResults);
 
       // Execute and loop to store the results against the node ID key.
@@ -292,6 +290,8 @@ class QueryService implements QueryServiceInterface {
   /**
    * Load Nodes from the results of a QueryService query.
    *
+   * @param array $query_results
+   * @param string $view_mode
    * @return array
    *   An array of node objects.
    */
